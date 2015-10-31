@@ -1,0 +1,49 @@
+%!PS
+
+/myEval {
+{
+    % if a number return it.
+    dup type /integertype eq {exit} if
+    % else if a bool return it.
+    dup type /booleantype eq {exit} if
+    % if null return itself
+    dup type /nulltype eq {exit} if
+    % quote requires array
+    dup type /arraytype eq {
+        dup tail /quote eq {!first exit} if
+    } if
+    dup type /arraytype eq { !tail exch head {myEval} map exch myApply exit} if
+
+    exit
+} loop
+}.
+
+% 3 myEval ==
+% true myEval ==
+% null myEval ==
+% {3 quote} myEval
+% 3
+% {{a b c} quote} myEval
+% {a b c}
+
+/myApply {
+{
+   dup /car eq {first exit} if
+   dup /cdr eq {pop rest exit} if
+   dup /nil? eq {pop null eq exit} if
+   dup /number? eq {pop type /integertype eq exit} if
+   dup /cons eq {pop cons exit} if
+   dup /eq? eq {pop dup length 2 eq {dup car exch cdr car eq} {false} ifelse exit} if
+   dup /+ eq {pop 0 {+} fold exit} if
+   dup /gt? eq {pop dup length 2 eq {dup car exch cdr car gt} {false} ifelse exit} if
+
+   exit
+} loop
+}.
+
+% {1 3} /car myApply
+% {1 3} /cdr myApply
+% 3 {4 5} /cons myApply
+
+/num {[0 1 2 3 4 5 6 7 8 9] }.
+

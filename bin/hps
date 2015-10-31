@@ -1,0 +1,9 @@
+#!/bin/sh
+#    -dOSTACKPRINT \
+#    -dESTACKPRINT \
+#   -dWRITESYSTEMDICT \
+
+rlwrap ghostscript -q \
+    -dNOSAFER \
+    -dNODISPLAY \
+    -c '(initdefs.ps) run' $*
