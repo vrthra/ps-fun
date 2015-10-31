@@ -51,7 +51,71 @@
 /range {[rup exch aload pop rup exch rdown {} for]}.
 
 % higher order thingies.
-/map { [ rup forall ] }.
+% /map { [ rup forall ] }.
+% <array/string> <proc> map <new array/string>
+/map {
+    4 dict begin
+
+        /,proc exch def
+        /,arr exch def
+        /,res ,arr length
+             ,arr type /stringtype eq { string } { array } ifelse
+        def
+        /,i 1 array def
+        {
+            0 1 /,arr length 1 sub { % for
+                dup /,i 0  3 -1 roll  put
+                /,arr exch get
+                /,proc exec
+                /,res /,i 0 get  3 -1 roll  put
+            } for
+            /,res
+        } deepcopy dup currentdict replaceall
+    end exec
+} bind def
+
+% copies array recursively
+% <array> deepcopy <new array>
+/deepcopy {
+    dup xcheck exch
+    dup length array copy
+    dup length 1 sub 0 exch 1 exch { % for       % a i
+        2 copy 2 copy get dup type /arraytype eq % a i a i e ?
+        { % ifelse
+            deepcopy put
+        }
+        {
+            pop pop pop
+        } ifelse
+        pop
+    } for
+    exch { cvx } if
+} bind def
+
+% recursively replaces elements in <array> found in <dict>
+% <array> <dict> replaceall -
+/replaceall {
+    1 index length 1 sub  0 1  3 -1 roll { % for 0 1 length-1
+        3 copy  3 -1 roll  exch    % a d i d a i
+        get                        % a d i d e
+        2 copy known               % a d i d e ?
+        % ifelse
+        {                          % a d i d e
+            get                    % a d i v
+            3 index  3 1 roll      % a d a i v
+            put
+        } % else
+        {                          % a d i d e
+            dup type /arraytype eq % a d i d e ?
+            { exch replaceall }
+            { pop pop } ifelse
+            pop
+        } ifelse                   % a d
+    } for
+    pop pop
+} bind def
+
+
 % [1 2 3 4] {1 add} map
 /fold {rup exch rdown forall}.
 %/reverse {{} {exch cons} fold}.
@@ -223,3 +287,6 @@ end
 % set the prompt to something else so that we know initlib is loaded.
 /prompt {(>| ) print flush} bind def
 /:x {(me.ps) run}.
+
+
+
